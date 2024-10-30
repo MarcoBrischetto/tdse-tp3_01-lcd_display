@@ -4,10 +4,13 @@
 
 //=====[Main function, the program entry point after power on or reset]========
 
-int main()
+
+int main() 
 {
     smartHomeSystemInit();
     while (true) {
         smartHomeSystemUpdate();
     }
 }
+
+//Comentario

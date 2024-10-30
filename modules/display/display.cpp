@@ -56,8 +56,8 @@
 
 #define DISPLAY_PIN_A_PCF8574 3
 
-#define I2C1_SDA PB_9
-#define I2C1_SCL PB_8
+#define I2C1_SDA PB_7
+#define I2C1_SCL PB_6
 
 #define PCF8574_I2C_BUS_8BIT_WRITE_ADDRESS 78
 
@@ -78,16 +78,16 @@ typedef struct{
 
 //=====[Declaration and initialization of public global objects]===============
 
-DigitalOut displayD0( D0 );
-DigitalOut displayD1( D1 );
-DigitalOut displayD2( D2 );
-DigitalOut displayD3( D3 );
-DigitalOut displayD4( D4 );
-DigitalOut displayD5( D5 );
-DigitalOut displayD6( D6 );
-DigitalOut displayD7( D7 );
-DigitalOut displayRs( D8 );
-DigitalOut displayEn( D9 );
+DigitalOut displayD0( D10 ); //no se puede
+DigitalOut displayD1( D11 ); //no se puede
+DigitalOut displayD2( D2 ); //se puede
+DigitalOut displayD3( /*D3*/ D12 ); //no se puede
+DigitalOut displayD4( D4 ); //se puede
+DigitalOut displayD5( D5 ); //se puede
+DigitalOut displayD6( D6 ); //se puede
+DigitalOut displayD7( D7 ); //se puede
+DigitalOut displayRs( D8 ); //se puede
+DigitalOut displayEn( D9 ); //se puede
 
 I2C i2cPcf8574( I2C1_SDA, I2C1_SCL ); 
 
@@ -242,7 +242,7 @@ static void displayCodeWrite( bool type, uint8_t dataBus )
 {
     if ( type == DISPLAY_RS_INSTRUCTION )
         displayPinWrite( DISPLAY_PIN_RS, DISPLAY_RS_INSTRUCTION);
-        else
+    else
         displayPinWrite( DISPLAY_PIN_RS, DISPLAY_RS_DATA);
     displayPinWrite( DISPLAY_PIN_RW, DISPLAY_RW_WRITE );
     displayDataBusWrite( dataBus );
@@ -293,7 +293,7 @@ static void displayPinWrite( uint8_t pinName, int value )
                     default: break;
                 }
             }
-            else {
+           else {
                 switch( pinName ) {
                     case DISPLAY_PIN_D4: pcf8574.displayPinD4 = OFF; break;
                     case DISPLAY_PIN_D5: pcf8574.displayPinD5 = OFF; break;

@@ -4,15 +4,7 @@
 #include "arm_book_lib.h"
 
 #include "user_interface.h"
-
-#include "code.h"
-#include "siren.h"
 #include "smart_home_system.h"
-#include "fire_alarm.h"
-#include "date_and_time.h"
-#include "temperature_sensor.h"
-#include "gas_sensor.h"
-#include "matrix_keypad.h"
 #include "display.h"
 
 //=====[Declaration of private defines]========================================
@@ -29,8 +21,6 @@ DigitalOut systemBlockedLed(LED2);
 //=====[Declaration of external public global variables]=======================
 
 //=====[Declaration and initialization of public global variables]=============
-
-char codeSequenceFromUserInterface[CODE_NUMBER_OF_KEYS];
 
 //=====[Declaration and initialization of private global variables]============
 
@@ -53,94 +43,36 @@ static void userInterfaceDisplayUpdate();
 
 void userInterfaceInit()
 {
-    incorrectCodeLed = OFF;
-    systemBlockedLed = OFF;
-    matrixKeypadInit( SYSTEM_TIME_INCREMENT_MS );
     userInterfaceDisplayInit();
 }
 
 void userInterfaceUpdate()
 {
-    userInterfaceMatrixKeypadUpdate();
-    incorrectCodeIndicatorUpdate();
-    systemBlockedIndicatorUpdate();
     userInterfaceDisplayUpdate();
-}
-
-bool incorrectCodeStateRead()
-{
-    return incorrectCodeState;
-}
-
-void incorrectCodeStateWrite( bool state )
-{
-    incorrectCodeState = state;
-}
-
-bool systemBlockedStateRead()
-{
-    return systemBlockedState;
-}
-
-void systemBlockedStateWrite( bool state )
-{
-    systemBlockedState = state;
-}
-
-bool userInterfaceCodeCompleteRead()
-{
-    return codeComplete;
-}
-
-void userInterfaceCodeCompleteWrite( bool state )
-{
-    codeComplete = state;
 }
 
 //=====[Implementations of private functions]==================================
 
-static void userInterfaceMatrixKeypadUpdate()
-{
-    static int numberOfHashKeyReleased = 0;
-    char keyReleased = matrixKeypadUpdate();
 
-    if( keyReleased != '\0' ) {
+#define DISPLAY_4BITS   1
+#define DISPLAY_8BITS   2
+#define DISPLAY_I2C     3
 
-        if( sirenStateRead() && !systemBlockedStateRead() ) {
-            if( !incorrectCodeStateRead() ) {
-                codeSequenceFromUserInterface[numberOfCodeChars] = keyReleased;
-                numberOfCodeChars++;
-                if ( numberOfCodeChars >= CODE_NUMBER_OF_KEYS ) {
-                    codeComplete = true;
-                    numberOfCodeChars = 0;
-                }
-            } else {
-                if( keyReleased == '#' ) {
-                    numberOfHashKeyReleased++;
-                    if( numberOfHashKeyReleased >= 2 ) {
-                        numberOfHashKeyReleased = 0;
-                        numberOfCodeChars = 0;
-                        codeComplete = false;
-                        incorrectCodeState = OFF;
-                    }
-                }
-            }
-        }
-    }
-}
+#define DISPLAY_MODE (DISPLAY_I2C)
 
 static void userInterfaceDisplayInit()
-{
+{   
+    #if(DISPLAY_MODE == DISPLAY_4BITS)
+    displayInit( DISPLAY_CONNECTION_GPIO_4BITS );
+    #endif
+    #if(DISPLAY_MODE == DISPLAY_8BITS)
+    displayInit( DISPLAY_CONNECTION_GPIO_8BITS );
+    #endif
+    #if(DISPLAY_MODE == DISPLAY_I2C)
     displayInit( DISPLAY_CONNECTION_I2C_PCF8574_IO_EXPANDER );
-     
+    #endif
     displayCharPositionWrite ( 0,0 );
     displayStringWrite( "Temperature:" );
-
-    displayCharPositionWrite ( 0,1 );
-    displayStringWrite( "Gas:" );
-    
-    displayCharPositionWrite ( 0,2 );
-    displayStringWrite( "Alarm:" );
 }
 
 static void userInterfaceDisplayUpdate()
@@ -153,27 +85,13 @@ static void userInterfaceDisplayUpdate()
 
         accumulatedDisplayTime = 0;
 
-        sprintf(temperatureString, "%.0f", temperatureSensorReadCelsius());
+        sprintf(temperatureString, "%.0f", 12.5);
         displayCharPositionWrite ( 12,0 );
         displayStringWrite( temperatureString );
         displayCharPositionWrite ( 14,0 );
         displayStringWrite( "'C" );
 
         displayCharPositionWrite ( 4,1 );
-
-        if ( gasDetectorStateRead() ) {
-            displayStringWrite( "Detected    " );
-        } else {
-            displayStringWrite( "Not Detected" );
-        }
-
-        displayCharPositionWrite ( 6,2 );
-        
-        if ( sirenStateRead() ) {
-            displayStringWrite( "ON " );
-        } else {
-            displayStringWrite( "OFF" );
-        }
 
     } else {
         accumulatedDisplayTime =

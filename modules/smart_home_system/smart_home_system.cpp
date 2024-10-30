@@ -4,12 +4,7 @@
 
 #include "smart_home_system.h"
 
-#include "siren.h"
 #include "user_interface.h"
-#include "fire_alarm.h"
-#include "pc_serial_com.h"
-#include "event_log.h"
-
 //=====[Declaration of private defines]========================================
 
 //=====[Declaration of private data types]=====================================
@@ -29,17 +24,11 @@
 void smartHomeSystemInit()
 {
     userInterfaceInit();
-    fireAlarmInit();
-    pcSerialComInit();
 }
 
 void smartHomeSystemUpdate()
 {
     userInterfaceUpdate();
-    fireAlarmUpdate();    
-    pcSerialComUpdate();
-    eventLogUpdate();
-    delay(SYSTEM_TIME_INCREMENT_MS);
 }
 
 //=====[Implementations of private functions]==================================
